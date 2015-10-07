@@ -1,0 +1,140 @@
+package textProcessing.crawler.b;
+
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import textProcessing.crawler.a.Frequency;
+import textProcessing.crawler.a.Utilities;
+
+/**
+ * Counts the total number of words and their frequencies in a text file.
+ */
+public final class WordFrequencyCounter {
+	/**
+	 * This class should not be instantiated.
+	 */
+	private WordFrequencyCounter() {}
+
+	/**
+	 * Takes the input list of words and processes it, returning a list
+	 * of {@link Frequency}s.
+	 * 
+	 * This method expects a list of lowercase alphanumeric strings.
+	 * If the input list is null, an empty list is returned.
+	 * 
+	 * There is one frequency in the output list for every 
+	 * unique word in the original list. The frequency of each word
+	 * is equal to the number of times that word occurs in the original list. 
+	 * 
+	 * The returned list is ordered by decreasing frequency, with tied words sorted
+	 * alphabetically.
+	 * 
+	 * The original list is not modified.
+	 * 
+	 * Example:
+	 * 
+	 * Given the input list of strings 
+	 * ["this", "sentence", "repeats", "the", "word", "sentence"]
+	 * 
+	 * The output list of frequencies should be 
+	 * ["sentence:2", "the:1", "this:1", "repeats:1",  "word:1"]
+	 *  
+	 * @param words A list of words.
+	 * @return A list of word frequencies, ordered by decreasing frequency.
+	 */
+
+	@SuppressWarnings("unchecked") // NOTE: this statement only applies to the last part of this code to convert to generic types, see below
+	public static <T extends Comparable<T>> List<Frequency<T>> computeWordFrequencies(List<T> tokens) {
+
+		List<Frequency<String>> tempOutput = new ArrayList<>();  //initialize list to hold the temporary output frequencies
+		List<Frequency<T>> output = new ArrayList<>();  //initialize list to hold the output frequencies
+		if (tokens == null){              // if the input is null, return an empty list
+			return output;
+		}
+		else{    //otherwise
+
+			// code adapted from : http://stackoverflow.com/questions/16744853/java-count-occurrence-of-each-item-in-an-sorted-array
+			Map<String,Integer> map = new HashMap<String,Integer>();   // initialize the hash table to store the tokens and corresponding frequency values
+			// for all of the tokens
+			for (int i = 0; i < tokens.size(); i++) {   
+				String word=tokens.get(i).toString();  // convert to a string, store in variable "word"
+				if (!map.containsKey(word)){           // if the hash map does not have the token
+					map.put(word,1);                   // place in the map with a starting frequency of 1
+				} else {
+					map.put(word, map.get(word) +1);   // if the token is in the map, increase the frequency
+				}
+			}
+
+			ArrayList<String> tempKeys = new ArrayList<String>();  // initialize list to hold the keys
+			// iterate over all keys in Hashmap, borrowed from: http://stackoverflow.com/questions/10462819/get-keys-from-hashmap-in-java
+			for (String key : map.keySet() ) {
+				tempKeys.add(key);        // add every key in the hashmap to the list "tempKeys"
+			}
+			Collections.sort(tempKeys);     // sort the tokens alphabetically
+
+			if (tempKeys.size() != 0){
+				tempOutput.add(new Frequency<String>(tempKeys.get(0),map.get(tempKeys.get(0))));  // add the first frequency to the final list
+			}
+			// add the rest of the freqencies in order by frequency and then by name
+			for (int i = 1; i < tempKeys.size(); i++){
+				// go backwards through the list being created
+				for (int j = tempOutput.size()-1; j > -1; j--){
+					int currentKey = map.get(tempKeys.get(i));         // set the key to be examined in "currentKey"
+					if (tempOutput.get(j).getFrequency() >= currentKey){   // if currentKey is less than or equal to the item in the list, place the new frequency after this item
+						Frequency<String> temp = new Frequency<String>(tempKeys.get(i),currentKey);  // create the new frequency object to be placed in the list
+						tempOutput.add(j+1, temp);  // place the item in the appropriate spot in the list 
+						break;
+					}
+					if (j == 0){  // if the current item has been compared to all other items in the list
+						tempOutput.add(0, new Frequency<String>(tempKeys.get(i),currentKey));     // place the frequency at the beginning of the list
+						break;
+					}
+				}
+			}
+
+			// convert the Frequency<String>'s to Frequency<T>'s, this is the only part of the code affected by the SuppressWarnings statement above
+			for (int i=0; i < tempOutput.size(); i++){
+				output.add((Frequency<T>)tempOutput.get(i));
+			}
+			return output;
+		}
+	}
+
+
+	/**
+	 * Runs the word frequency counter. The input should be the path to a text file.
+	 * 
+	 * @param args The first element should contain the path to a text file.
+	 */
+	public static void main(String[] args) {
+
+		List<String> words = Utilities.tokenizeFile(args[0]);
+		List<Frequency<String>> frequencies = computeWordFrequencies(words);
+		BufferedWriter log = null;
+		try{
+			log = new BufferedWriter(new OutputStreamWriter(System.out));
+			Utilities.printFrequencies(log,frequencies);
+		}
+		finally{
+			if(log != null){
+				try {
+					log.flush();
+				} catch (IOException e) {
+				}
+				finally{
+					try{
+						log.close();
+					} catch (IOException e) {
+					}
+				}
+			}
+		}
+	}
+}

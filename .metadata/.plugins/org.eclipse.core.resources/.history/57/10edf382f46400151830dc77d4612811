@@ -1,0 +1,233 @@
+import java.util.*;
+
+import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.parser.*;
+import edu.uci.ics.crawler4j.url.*;
+import textProcessing.crawler.a.Frequency;
+import textProcessing.crawler.a.TwoGram;
+import textProcessing.crawler.a.Utilities;
+import textProcessing.crawler.b.WordFrequencyCounter;
+import textProcessing.crawler.c.TwoGramFrequencyCounter;
+
+public class MyCrawler extends WebCrawler {
+
+	@Override
+	public boolean shouldVisit(Page referringPage, WebURL url){
+		String href = url.getURL();
+		return href.startsWith("http://djp3.westmont.edu/classes/2015_09_CS150/tasks/crawl_bible/Bible");
+	}
+
+	static List<String> urls = new ArrayList<String>();
+	static int linkcount = 0;
+	static List<Integer> wordLength = new ArrayList<Integer>();
+	static Map<Integer,String> longPage = new HashMap<Integer,String>();
+	static List<String> allWords = new ArrayList<String>();
+
+	@Override
+	public void visit (Page page){
+
+		String url = page.getWebURL().getURL();
+		urls.add(url);
+
+		if (page.getParseData() instanceof HtmlParseData) {
+			HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
+			String text = htmlParseData.getText();
+			List<String> words = Utilities.tokenizeFile(text);
+			for (int i = 0; i < words.size(); i++){
+				if (words.get(i) != "a" &&
+						words.get(i) != "about" &&
+						words.get(i) != "above" &&
+						words.get(i) != "after" &&
+						words.get(i) != "again" &&
+						words.get(i) != "against" &&
+						words.get(i) != "all" &&
+						words.get(i) != "am" &&
+						words.get(i) != "an" &&
+						words.get(i) != "and" &&
+						words.get(i) != "any" &&
+						words.get(i) != "are" &&
+						words.get(i) != "aren" &&
+						words.get(i) != "as" &&
+						words.get(i) != "at" &&
+						words.get(i) != "be" &&
+						words.get(i) != "because" &&
+						words.get(i) != "been" &&
+						words.get(i) != "before" &&
+						words.get(i) != "being" &&
+						words.get(i) != "below" &&
+						words.get(i) != "between" &&
+						words.get(i) != "both" &&
+						words.get(i) != "but" &&
+						words.get(i) != "by" &&
+						words.get(i) != "can" &&
+						words.get(i) != "cannot" &&
+						words.get(i) != "could" &&
+						words.get(i) != "did" &&
+						words.get(i) != "do" &&
+						words.get(i) != "does" &&
+						words.get(i) != "doesn" &&
+						words.get(i) != "doing" &&
+						words.get(i) != "don" &&
+						words.get(i) != "down" &&
+						words.get(i) != "during" &&
+						words.get(i) != "each" &&
+						words.get(i) != "few" &&
+						words.get(i) != "for" &&
+						words.get(i) != "from" &&
+						words.get(i) != "further" &&
+						words.get(i) != "had" &&
+						words.get(i) != "hadn" &&
+						words.get(i) != "has" &&
+						words.get(i) != "hasn" &&
+						words.get(i) != "have" &&
+						words.get(i) != "haven" &&
+						words.get(i) != "having" &&
+						words.get(i) != "he" &&
+						words.get(i) != "her" &&
+						words.get(i) != "here" &&
+						words.get(i) != "hers" &&
+						words.get(i) != "herself" &&
+						words.get(i) != "him" &&
+						words.get(i) != "himself" &&
+						words.get(i) != "his" &&
+						words.get(i) != "how" &&
+						words.get(i) != "i" &&
+						words.get(i) != "if" &&
+						words.get(i) != "in" &&
+						words.get(i) != "into" &&
+						words.get(i) != "is" &&
+						words.get(i) != "isn" &&
+						words.get(i) != "it" &&
+						words.get(i) != "its" &&
+						words.get(i) != "itself" &&
+						words.get(i) != "let" &&
+						words.get(i) != "me" &&
+						words.get(i) != "more" &&
+						words.get(i) != "most" &&
+						words.get(i) != "mustn" &&
+						words.get(i) != "my" &&
+						words.get(i) != "myself" &&
+						words.get(i) != "no" &&
+						words.get(i) != "nor" &&
+						words.get(i) != "not" &&
+						words.get(i) != "of" &&
+						words.get(i) != "off" &&
+						words.get(i) != "on" &&
+						words.get(i) != "once" &&
+						words.get(i) != "only" &&
+						words.get(i) != "or" &&
+						words.get(i) != "other" &&
+						words.get(i) != "ought" &&
+						words.get(i) != "our" &&
+						words.get(i) != "ours" &&
+						words.get(i) != "ourselves" &&
+						words.get(i) != "out" &&
+						words.get(i) != "over" &&
+						words.get(i) != "own" &&
+						words.get(i) != "same" &&
+						words.get(i) != "shan" &&
+						words.get(i) != "she" &&
+						words.get(i) != "should" &&
+						words.get(i) != "shouldn" &&
+						words.get(i) != "so" &&
+						words.get(i) != "some" &&
+						words.get(i) != "such" &&
+						words.get(i) != "than" &&
+						words.get(i) != "that" &&
+						words.get(i) != "the" &&
+						words.get(i) != "their" &&
+						words.get(i) != "theirs" &&
+						words.get(i) != "them" &&
+						words.get(i) != "themselves" &&
+						words.get(i) != "then" &&
+						words.get(i) != "there" &&
+						words.get(i) != "these" &&
+						words.get(i) != "they" &&
+						words.get(i) != "this" &&
+						words.get(i) != "those" &&
+						words.get(i) != "through" &&
+						words.get(i) != "to" &&
+						words.get(i) != "too" &&
+						words.get(i) != "under" &&
+						words.get(i) != "up" &&
+						words.get(i) != "until" &&
+						words.get(i) != "very" &&
+						words.get(i) != "was" &&
+						words.get(i) != "wasn" &&
+						words.get(i) != "we" &&
+						words.get(i) != "was" &&
+						words.get(i) != "were" &&
+						words.get(i) != "weren" &&
+						words.get(i) != "what" &&
+						words.get(i) != "when" &&
+						words.get(i) != "where" &&
+						words.get(i) != "which" &&
+						words.get(i) != "while" &&
+						words.get(i) != "who" &&
+						words.get(i) != "whom" &&
+						words.get(i) != "why" &&
+						words.get(i) != "with" &&
+						words.get(i) != "won" &&
+						words.get(i) != "would" &&
+						words.get(i) != "wouldn" &&
+						words.get(i) != "you" &&
+						words.get(i) != "your" &&
+						words.get(i) != "yours" &&
+						words.get(i) != "yourself" &&
+						words.get(i) != "yourselves" &&
+						words.get(i) != "s" &&
+						words.get(i) != "t" &&
+						words.get(i) != "nt" &&
+						words.get(i) != "d" &&
+						words.get(i) != "ll" &&
+						words.get(i) != "m" &&
+						words.get(i) != "ve" &&
+						words.get(i) != "re"){
+					allWords.add(words.get(i));
+				}
+			}
+			List<Frequency<String>> frequencies = WordFrequencyCounter.computeWordFrequencies(words);
+			int numOfWords = 0;
+			for (int i = 0; i < frequencies.size(); i++){
+				numOfWords += frequencies.get(i).getFrequency();
+			}
+			wordLength.add(numOfWords);
+			longPage.put(numOfWords, url);
+			Set<WebURL> links = htmlParseData.getOutgoingUrls();
+
+			linkcount += links.size();
+			//System.out.println("Text length: " + text.length());
+			System.out.println("Number of outgoing links: " + links.size());
+		}
+	}
+
+	public static int countURLS(){
+		Set<String> count = new HashSet<String>(urls); 
+		return count.size();
+	}
+
+	public static int countLinks(){
+		return linkcount;
+	}
+
+	public static String longest(){
+		Collections.sort(wordLength);
+
+		return longPage.get(wordLength.get(wordLength.size()-1));
+	}
+
+	public static void frequencies(){
+		List<Frequency<String>> count = WordFrequencyCounter.computeWordFrequencies(allWords);
+		for (int i = 0; i < 25; i++){
+			System.out.println(count.get(i));
+		}
+	}
+
+	public static void twoGramCounter(){
+		List<Frequency<TwoGram<String>>> count = TwoGramFrequencyCounter.computeTwoGramFrequencies(allWords);
+		for (int i = 0; i < 25; i++){
+			System.out.println(count.get(i));
+		}
+	}
+
+}

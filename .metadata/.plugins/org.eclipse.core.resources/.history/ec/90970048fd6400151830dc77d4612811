@@ -1,0 +1,110 @@
+package textProcessing.crawler.c;
+
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import textProcessing.crawler.a.Frequency;
+import textProcessing.crawler.a.TwoGram;
+import textProcessing.crawler.a.Utilities;
+
+/**
+ * Count the total number of 2-grams and their frequencies in a text file.
+ */
+public final class TwoGramFrequencyCounter {
+	/**
+	 * This class should not be instantiated.
+	 */
+	private TwoGramFrequencyCounter() {}
+
+	/**
+	 * Takes the input list of words and processes it, returning a list
+	 * of {@link Frequency}s.
+	 * 
+	 * This method expects a list of lowercase alphanumeric strings.
+	 * If the input list is null, an empty list is returned.
+	 * 
+	 * There is one frequency in the output list for every 
+	 * unique 2-gram in the original list. The frequency of each 2-grams
+	 * is equal to the number of times that two-gram occurs in the original list. 
+	 * 
+	 * The returned list is ordered by decreasing frequency, with tied 2-grams sorted
+	 * alphabetically. 
+	 * 
+	 * 
+	 * 
+	 * Example:
+	 * 
+	 * Given the input list of strings 
+	 * ["you", "think", "you", "know", "how", "you", "think"]
+	 * 
+	 * The output list of 2-gram frequencies should be 
+	 * ["you think:2", "how you:1", "know how:1", "think you:1", "you know:1"]
+	 *  
+	 * @param tokens A list of words.
+	 * @return A list of two gram frequencies, ordered by decreasing frequency.
+	 */
+	
+	public static <T extends Comparable<T>> List<Frequency<TwoGram<T>>> computeTwoGramFrequencies(List<T> tokens) {
+
+		List<Frequency<TwoGram<T>>> output = new ArrayList<Frequency<TwoGram<T>>>();
+		if (tokens == null){  // if the input is null, return an empty list
+			return output;
+		}
+		else{      // otherwise
+
+			// code adapted from : http://stackoverflow.com/questions/16744853/java-count-occurrence-of-each-item-in-an-sorted-array
+			Map<TwoGram<T>,Integer> map = new HashMap<TwoGram<T>,Integer>();   // initialize the hash table to store the tokens and corresponding frequency values
+			// for all of the tokens
+			for (int i = 0; i < tokens.size()-1; i++) {   
+				TwoGram<T> temp = new TwoGram<T>(tokens.get(i),tokens.get(i+1));
+				if (!map.containsKey(temp)){           // if the hash map does not have the TwoGram
+					map.put(temp,1);                   // place in the map with a starting frequency of 1
+				} else {
+					map.put(temp, map.get(temp) +1);   // if the TwoGram is in the map, increase the frequency
+				}
+			}
+			
+			ArrayList<TwoGram<T>> tempKeys = new ArrayList<TwoGram<T>>();  // initialize list to hold the keys of "map"
+			// iterate over all keys in "map", borrowed from: http://stackoverflow.com/questions/10462819/get-keys-from-hashmap-in-java
+			for (TwoGram<T> key : map.keySet() ) {
+				tempKeys.add(key);        // add every key in the hashmap to the list "tempKeys"
+			}
+			Collections.sort(tempKeys);     // sort the TwoGrams alphabetically
+			if (tempKeys.size() != 0){
+				output.add(new Frequency<TwoGram<T>>(tempKeys.get(0),map.get(tempKeys.get(0))));  // add the first frequency to the final list
+			}
+			// add the rest of the freqencies in order by frequency and then by name
+			for (int i = 1; i < tempKeys.size(); i++){
+				// go backwards through the list being created
+				for (int j = output.size()-1; j > -1; j--){
+					int currentKey = map.get(tempKeys.get(i));         // set the key to be examined in "currentKey"
+					if (output.get(j).getFrequency() >= currentKey){   // if currentKey is less than or equal to the item in the list, place the new frequency after this item
+						output.add(j+1, new Frequency<TwoGram<T>>(tempKeys.get(i),currentKey));  // place the item in the appropriate spot in the list 
+						break;
+					}
+					if (j == 0){   // if the current item has been compared to all other items in the list
+						output.add(0, new Frequency<TwoGram<T>>(tempKeys.get(i),currentKey));  // place the frequency at the beginning of the list
+					}
+				}
+			}
+			return output;
+		}
+	}
+
+	/**
+	 * Runs the 2-gram counter. The input should be the path to a text file.
+	 * 
+	 * @param args The first element should contain the path to a text file.
+	 */
+	public static void main(String[] args) {
+
+		ArrayList<String> words = Utilities.tokenizeFile(args[0]);
+		List<Frequency<TwoGram<String>>> frequencies = computeTwoGramFrequencies(words);
+		Utilities.printFrequencies(new BufferedWriter(new OutputStreamWriter(System.out)),frequencies);
+	}
+}

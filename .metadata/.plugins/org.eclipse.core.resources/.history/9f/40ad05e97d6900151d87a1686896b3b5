@@ -1,0 +1,307 @@
+package textProcessing.crawler.d;
+
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import textProcessing.crawler.a.Frequency;
+import textProcessing.crawler.a.Utilities;
+
+public class PalindromeFrequencyCounter {
+	/**
+	 * This class should not be instantiated.
+	 */
+	private PalindromeFrequencyCounter() {}
+
+	/**
+	 * Takes the input list of words and processes it, returning a list
+	 * of {@link Frequency}s.
+	 * 
+	 * This method expects a list of lowercase alphanumeric strings.
+	 * If the input list is null, an empty list is returned.
+	 * 
+	 * There is one frequency in the output list for every 
+	 * unique palindrome found in the original list. The frequency of each palindrome
+	 * is equal to the number of times that palindrome occurs in the original list. Smaller palindromes
+	 * within larger palindromes should not be separately counted.  Overlapping
+	 * palindromes should be counted separately.
+	 * 
+	 * Palindromes can span sequential words in the input list.
+	 * 
+	 * The returned list is ordered by decreasing frequency, with tied palindromes sorted
+	 * alphabetically. 
+	 * 
+	 * The original list is not modified.
+	 *
+	 * In a literary sense, palindromes end on word boundaries.  For our
+	 * purposes palindromes can start and end within words.
+	 *
+	 * Only return palindromes longer than 5 characters.  Spaces do not count
+	 * and should not be included in the returned list.
+	 * 
+	 * Example:
+	 * 
+	 * Given the input list of strings 
+	 * ["do", "geese", "see", "god", "abba", "bat", "tab","xxbap","bat", "tab"]
+	 * 
+	 * The output list of palindromes should be 
+	 * [ "battab:2", "abxxba:1", "dogeeseseegod:1"]
+	 *  
+	 * @param words A list of words.
+	 * @return A list of palindrome frequencies, ordered by decreasing frequency.
+	 */
+	/**
+	 * Takes the input list of words and processes it, returning a list
+	 * of {@link Frequency}s.
+	 * 
+	 * This method expects a list of lowercase alphanumeric strings.
+	 * If the input list is null, an empty list is returned.
+	 * 
+	 * There is one frequency in the output list for every 
+	 * unique palindrome found in the original list. The frequency of each palindrome
+	 * is equal to the number of times that palindrome occurs in the original list. Smaller palindromes
+	 * within larger palindromes should not be separately counted.  Overlapping
+	 * palindromes should be counted separately.
+	 * 
+	 * Palindromes can span sequential words in the input list.
+	 * 
+	 * The returned list is ordered by decreasing frequency, with tied palindromes sorted
+	 * alphabetically. 
+	 * 
+	 * The original list is not modified.
+	 *
+	 * In a literary sense, palindromes end on word boundaries.  For our
+	 * purposes palindromes can start and end within words.
+	 *
+	 * Only return palindromes longer than 5 characters.  Spaces do not count
+	 * and should not be included in the returned list.
+	 * 
+	 * Example:
+	 * 
+	 * Given the input list of strings 
+	 * ["do", "geese", "see", "god", "abba", "bat", "tab"]
+	 * 
+	 * The output list of palindromes should be 
+	 * ["do geese see god:1", "bat tab:1", "abba:1"]
+	 *  
+	 * @param words A list of words.
+	 * @return A list of palindrome frequencies, ordered by decreasing frequency.
+	 */
+	public static List<Frequency<String>> computePalindromeFrequencies(List<String> words) {
+		
+		if(words == null){
+			return new ArrayList<Frequency<String>>();
+		}
+		
+		StringBuilder sb = new StringBuilder("");
+		for(String s:words){
+			sb.append(s);
+		}
+		Map<String,Integer> p = new HashMap<String,Integer>();
+		//Odd palindromes
+		for(int i=0;i < sb.length();i++){
+			//Check odd
+			int index = 1;
+			while( ((i-index) >= 0) && ((i+index) < sb.length()) && (sb.charAt(i-index) == sb.charAt(i+index))){
+				index++;
+			}
+			//Only palindromes greater than 5
+			if(index >= 3){
+				String newP = sb.substring(i-(index-1),i+(index-1)+1);
+				if(p.containsKey(newP)){
+					p.put(newP, p.get(newP) +1);
+				}
+				else{
+					p.put(newP,1);
+				}
+			}
+		}
+		
+		//Even palindromes
+		for(int i=0;i < sb.length();i++){
+			//Check odd
+			int index = 1;
+			while( ((i-(index-1)) >= 0) && ((i+index) < sb.length()) && (sb.charAt(i-(index-1)) == sb.charAt(i+index))){
+				index++;
+			}
+			//Only palindromes greater than 5
+			if(index >= 4){
+				String newP = sb.substring(i-(index-2),i+(index-1)+1);
+				if(p.containsKey(newP)){
+					p.put(newP, p.get(newP) +1);
+				}
+				else{
+					p.put(newP,1);
+				}
+			}
+		}
+		String longest = new String();
+		for (String key: p.keySet()) {
+			int strlength = longest.length();
+		    if (strlength > longest.length()){
+		    	longest = key;
+		    }
+		}
+		List<Frequency<String>> output = new ArrayList<Frequency<String>>();
+		output.add(new Frequency<String>(longest , p.get(longest)));
+		return output;
+	}
+
+	/**
+	 * Same as computePalindromeFrequencies except it only includes palindromes
+	 * that end on word boundaries.
+	 * 
+	 * Example:
+	 * 
+	 * Given the input list of strings 
+	 * ["do", "geese", "see", "god", "abba", "bat", "tab","xxbap","bat", "tab"]
+	 * 
+	 * The output list of palindromes should be 
+	 * [ "battab:2", "dogeeseseegod:1"]
+	 *  
+	 * @param words A list of words.
+	 * @return A list of palindrome frequencies, ordered by decreasing frequency.
+	 */
+	public static List<Frequency<String>> computeWordAwarePalindromeFrequencies(List<String> words) {
+
+		// ideas adapted from: http://www.geeksforgeeks.org/find-number-distinct-palindromic-sub-strings-given-string/
+		// no code was directly copied from this site
+
+		List<Frequency<String>> output = new ArrayList<Frequency<String>>();
+		if (words == null){  // if the input is null, return an empty list
+			return output;
+		}
+		else{
+			String allWords = "";      // initialize the string to hold all tokens as a string
+			List<Integer> startingIndex = new ArrayList<Integer>();  // initialize the list to hold all the indicies on which words start
+			startingIndex.add(0);                                    // first word starts at index 0
+			List<Integer> finishingIndex = new ArrayList<Integer>(); // initialize the list to hold all the indicies on which words start
+			
+			//concatenate all tokens into the string "allWords" and update startingIndex and finishingIndex
+			for (int i = 0; i < words.size(); i++){
+				allWords += words.get(i);
+				finishingIndex.add(startingIndex.get(startingIndex.size()-1)+ words.get(i).length()-1); // add the finishing index of this word to finishingIndex
+				startingIndex.add(startingIndex.get(startingIndex.size()-1) + words.get(i).length());   // add the starting index of the next word to startingIndex
+			}
+			startingIndex.remove(startingIndex.size()-1);  // remove the extra starting index
+
+			List<String> evenPalindromes = calculateEvenPalindromesV2(allWords, startingIndex, finishingIndex); // find all the even palindromes on word boundaries
+			List<String> oddPalindromes = calculateOddPalindromesV2(allWords, startingIndex, finishingIndex);   // find all the odd palindromes on word boundaries
+
+			// code adapted from : http://stackoverflow.com/questions/16744853/java-count-occurrence-of-each-item-in-an-sorted-array
+			Map<String,Integer> map = new HashMap<String,Integer>();   // initialize the hash table to store the tokens and corresponding frequency values
+			// for all of the even Palindromes
+			for (int i = 0; i < evenPalindromes.size(); i++) {   
+				String word = evenPalindromes.get(i);  // store in variable "word"
+				if (!map.containsKey(word)){           // if the hash map does not have the token
+					map.put(word,1);                   // place in the map with a starting frequency of 1
+				} else {
+					map.put(word, map.get(word) +1);   // if the token is in the map, increase the frequency
+				}
+			}
+			// for all of the odd Palindromes
+			for (int i = 0; i < oddPalindromes.size(); i++) {   
+				String word = oddPalindromes.get(i);   // store in variable "word"
+				if (!map.containsKey(word)){           // if the hash map does not have the token
+					map.put(word,1);                   // place in the map with a starting frequency of 1
+				} else {
+					map.put(word, map.get(word) +1);   // if the token is in the map, increase the frequency
+				}
+			}
+
+			ArrayList<String> tempKeys = new ArrayList<String>();  // initialize list to hold the keys
+			// iterate over all keys in "map", borrowed from: http://stackoverflow.com/questions/10462819/get-keys-from-hashmap-in-java
+			for (String key : map.keySet() ) {
+				tempKeys.add(key);          // add every key in the hashmap to the list "tempKeys"
+			}
+			Collections.sort(tempKeys);     // sort the palindromes alphabetically
+
+			if (tempKeys.size() != 0){
+				output.add(new Frequency<String>(tempKeys.get(0),map.get(tempKeys.get(0))));  // add the first frequency to the final list
+			}
+			// add the rest of the freqencies in order by frequency and then by name
+			for (int i = 1; i < tempKeys.size(); i++){
+				// go backwards through the list being created
+				for (int j = output.size()-1; j > -1; j--){
+					int currentKey = map.get(tempKeys.get(i));         // set the key to be examined in "currentKey"
+					if (output.get(j).getFrequency() >= currentKey){   // if currentKey is less than or equal to the item in the list, place the new frequency after this item
+						Frequency<String> temp = new Frequency<String>(tempKeys.get(i),currentKey);
+						output.add(j+1, temp);  // place the item in the appropriate spot in the list 
+						break;
+					}
+					if (j == 0){
+						output.add(0, new Frequency<String>(tempKeys.get(i),currentKey));     // place the frequency at the beginning of the list
+						break;
+					}
+				}
+			}
+			return output;
+		}
+	}
+	
+	public static List<String> calculateEvenPalindromesV2(String allWords, List<Integer> startingIndex, List<Integer> finishingIndex){
+
+		List<String> output = new ArrayList<>();   // initialize the list to hold the output of palindromes
+		// use every character as a pivot point
+		for (int i=0; i < allWords.length(); i++){
+			int lower = i;      // consider the character of the pivot index
+			int upper = i+2;    // consider the next character
+			String potentialPalindrome = "";  // initialize the string to hold the palindromes found
+			// check boundary conditions, go until the word is no longer a palindrome
+			while ((-1 < lower) && (upper <= allWords.length()) && (allWords.substring(lower,lower+1).equals(allWords.substring(upper-1,upper)))){
+				potentialPalindrome = allWords.substring(lower,upper);  // update the palindrome as it grows larger
+				lower--;   // move the lower boundary
+				upper++;   // move the upper boundary
+			}
+			lower++;      // reset the lower boundary to be the index that the lower boundary stopped on
+			upper -= 2;   // reset the upper boundary to be the index that the upper boundary stopped on
+			// only include palindromes longer than 5 characters and end on word boundaries
+			if (potentialPalindrome.length() > 5 && startingIndex.contains(lower) && finishingIndex.contains(upper)){
+				output.add(potentialPalindrome);
+			}
+		}
+		return output;
+	}
+
+	public static List<String> calculateOddPalindromesV2(String allWords, List<Integer>startingIndex, List<Integer>finishingIndex){
+
+		List<String> output = new ArrayList<>();    // initialize the list to hold the output of palindromes
+		// use every character as a pivot point
+		for (int i=0; i < allWords.length(); i++){
+			int lower = i-1;   // consider the character to the left of the pivot
+			int upper = i+2;   // consider the character to the right of the pivot
+			String potentialPalindrome = "";  // initialize the string to hold the palindromes found
+			// check boundary conditions, go until the word is no longer a palindrome
+			while ((-1 < lower) && (upper <= allWords.length()) && (allWords.substring(lower,lower+1).equals(allWords.substring(upper-1,upper)))){
+				potentialPalindrome = allWords.substring(lower,upper);   // update the palindrome as it grows larger
+				lower--;  // move the lower boundary
+				upper++;  // move the upper boundary
+			}
+			lower++;      // reset the lower boundary to be the index that the lower boundary stopped on
+			upper -= 2;   // reset the upper boundary to be the index that the upper boundary stopped on
+			// only include palindromes longer than 5 characters and end on word boundaries
+			if (potentialPalindrome.length() > 5 && startingIndex.contains(lower) && finishingIndex.contains(upper)){
+				output.add(potentialPalindrome);
+			}
+		}
+		return output;
+	}
+
+	/**
+	 * Runs the palindrome finder. The input should be the path to a text file.
+	 * 
+	 * @param args The first element should contain the path to a text file.
+	 */
+	public static void main(String[] args) {
+
+		ArrayList<String> words = Utilities.tokenizeFile(args[0]);
+		List<Frequency<String>> frequencies = computePalindromeFrequencies(words);     // CHANGE THIS BACK!
+		Utilities.printFrequencies(new BufferedWriter(new OutputStreamWriter(System.out)),frequencies);
+	}
+}

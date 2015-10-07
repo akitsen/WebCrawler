@@ -1,0 +1,60 @@
+import java.util.*;
+
+import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.parser.*;
+import edu.uci.ics.crawler4j.url.*;
+import textProcessing.crawler.a.Frequency;
+import textProcessing.crawler.a.Utilities;
+import textProcessing.crawler.b.WordFrequencyCounter;
+
+public class MyCrawler extends WebCrawler {
+
+	@Override
+	public boolean shouldVisit(Page referringPage, WebURL url){
+		String href = url.getURL();
+		return href.startsWith("http://djp3.westmont.edu/classes/2015_09_CS150/tasks/crawl_bible/Bible");
+	}
+	
+	static List<String> urls = new ArrayList<String>();
+	static int linkcount = 0;
+	static HashMap<String,Integer> longPage = new HashMap<String,Integer>();
+
+	@Override
+	public void visit (Page page){
+
+		String url = page.getWebURL().getURL();
+		urls.add(url);
+
+		if (page.getParseData() instanceof HtmlParseData) {
+			HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
+			String text = htmlParseData.getText();
+			List<String> words = Utilities.tokenizeFile(text);
+			List<Frequency<String>> frequencies = WordFrequencyCounter.computeWordFrequencies(words);
+			int numOfWords = 0;
+			for (int i = 0; i < frequencies.size(); i++){
+				numOfWords += frequencies.get(i).getFrequency();
+			}
+			wordCount.add(numOfWords);
+			Set<WebURL> links = htmlParseData.getOutgoingUrls();
+
+			linkcount += links.size();
+			//System.out.println("Text length: " + text.length());
+			System.out.println("Number of outgoing links: " + links.size());
+		}
+	}
+	
+	public static int countURLS(){
+		Set<String> count = new HashSet<String>(urls); 
+		return count.size();
+	}
+	
+	public static int countLinks(){
+		return linkcount;
+	}
+	
+	public static int longest(){
+		Collections.sort(wordCount);
+		return wordCount.get(wordCount.size()-1);
+	}
+
+}

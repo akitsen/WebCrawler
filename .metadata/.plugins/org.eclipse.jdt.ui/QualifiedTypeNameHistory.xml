@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="edu.uci.ics.crawler4j.crawler.Page"/>
+<fullyQualifiedTypeName name="edu.uci.ics.crawler4j.crawler.WebCrawler"/>
+<fullyQualifiedTypeName name="edu.uci.ics.crawler4j.url.WebURL"/>
+<fullyQualifiedTypeName name="edu.uci.ics.crawler4j.fetcher.PageFetcher"/>
+<fullyQualifiedTypeName name="edu.uci.ics.crawler4j.crawler.CrawlConfig"/>
+<fullyQualifiedTypeName name="edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig"/>
+<fullyQualifiedTypeName name="edu.uci.ics.crawler4j.parser.HtmlParseData"/>
+<fullyQualifiedTypeName name="java.util.Set"/>
+<fullyQualifiedTypeName name="textProcessing.crawler.b.WordFrequencyCounter"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="textProcessing.crawler.c.TwoGramFrequencyCounter"/>
+<fullyQualifiedTypeName name="textProcessing.crawler.a.TwoGram"/>
+<fullyQualifiedTypeName name="textProcessing.crawler.d.PalindromeFrequencyCounter"/>
+<fullyQualifiedTypeName name="java.util.Comparator"/>
+<fullyQualifiedTypeName name="java.util.LinkedHashMap"/>
+<fullyQualifiedTypeName name="java.util.Iterator"/>
+</qualifiedTypeNameHistroy>

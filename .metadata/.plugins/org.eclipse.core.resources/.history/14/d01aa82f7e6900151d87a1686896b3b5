@@ -1,0 +1,42 @@
+import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.fetcher.*;
+import edu.uci.ics.crawler4j.robotstxt.*;
+
+public class Controller {
+
+	public static void main(String[] args) throws Exception {
+		
+		final long startTime = System.currentTimeMillis();
+		
+		String crawlStorageFolder = "/data";
+        int numberOfCrawlers = 3;
+
+        CrawlConfig config = new CrawlConfig();
+        config.setCrawlStorageFolder(crawlStorageFolder);
+        config.setResumableCrawling(true);
+        config.setUserAgentString("Westmont IR Dillon Montag: Team Montag-Kitsen");
+        config.setPolitenessDelay(100);
+        
+        PageFetcher pageFetcher = new PageFetcher(config);
+        RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
+        RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
+        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
+        
+        controller.addSeed("http://djp3.westmont.edu/classes/2015_09_CS150/tasks/crawl_bible/Bible/bible.html");
+        
+        controller.start(MyCrawler.class, numberOfCrawlers);
+        
+        final long endTime = System.currentTimeMillis();
+        System.out.println("Total run time: " + (endTime - startTime));
+        System.out.println("Unique URL's: " + MyCrawler.countURLS());
+        System.out.println("Link Count: " + MyCrawler.countLinks());
+        System.out.println("Longest Page: " + MyCrawler.longest());
+        //System.out.println("The top most common words: ");
+        //MyCrawler.frequencies();
+        //System.out.println("The top most common two grams: ");
+        //MyCrawler.twoGramCounter();
+        MyCrawler.palindromes();
+		
+	}
+
+}

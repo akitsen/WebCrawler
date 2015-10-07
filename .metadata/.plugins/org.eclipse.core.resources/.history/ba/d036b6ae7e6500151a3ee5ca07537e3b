@@ -1,0 +1,113 @@
+import java.util.*;
+
+import edu.uci.ics.crawler4j.crawler.*;
+import edu.uci.ics.crawler4j.parser.*;
+import edu.uci.ics.crawler4j.url.*;
+import textProcessing.crawler.a.Frequency;
+import textProcessing.crawler.a.TwoGram;
+import textProcessing.crawler.a.Utilities;
+import textProcessing.crawler.b.WordFrequencyCounter;
+import textProcessing.crawler.c.TwoGramFrequencyCounter;
+import textProcessing.crawler.d.PalindromeFrequencyCounter;
+
+public class MyCrawler extends WebCrawler {
+
+	@Override
+	public boolean shouldVisit(Page referringPage, WebURL url){
+		String href = url.getURL();
+		return href.startsWith("http://djp3.westmont.edu/classes/2015_09_CS150/tasks/crawl_bible/Bible");
+	}
+
+	static List<String> urls = new ArrayList<String>();
+	static int linkcount = 0;
+	static List<Integer> wordLength = new ArrayList<Integer>();
+	static Map<Integer,String> longPage = new HashMap<Integer,String>();
+	static List<String> allWords = new ArrayList<String>();
+	static List<Integer> palindromeLength = new ArrayList<Integer>();
+	static List<Frequency<String>> allPalindromes = new ArrayList<Frequency<String>>();
+	static List<String> palindromeURL = new ArrayList<String>();
+	List<Frequency<TwoGram<String>>> dolcipcount = new ArrayList<Frequency<TwoGram<String>>>();
+
+	@Override
+	public void visit (Page page){
+
+		String url = page.getWebURL().getURL();
+		urls.add(url);
+
+		if (page.getParseData() instanceof HtmlParseData) {
+			HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
+			String text = htmlParseData.getText();
+			List<String> words = Utilities.tokenizeFile(text);
+			for (int i = 0; i < words.size(); i++){
+				allWords.add(words.get(i));
+			}
+			List<Frequency<String>> frequencies = WordFrequencyCounter.computeWordFrequencies(words);
+			int numOfWords = 0;
+			for (int i = 0; i < frequencies.size(); i++){
+				numOfWords += frequencies.get(i).getFrequency();
+			}
+			wordLength.add(numOfWords);
+			longPage.put(numOfWords, url);
+			List<Frequency<String>> palindromes = PalindromeFrequencyCounter.computePalindromeFrequencies(words);
+			for (int i = 0; i < palindromes.size(); i++){
+				allPalindromes.add(palindromes.get(i));
+				palindromeLength.add(palindromes.get(i).getToken().length());
+				palindromeURL.add(url);
+			}
+			
+			List<Frequency<TwoGram<String>>> tempList = TwoGramFrequencyCounter.computeTwoGramFrequencies(words);
+			for (int i = 0; i < tempList.size(); i++){
+				if (tempList.get(i).getToken().getFirst().equals("dolcipator") && tempList.get(i).getToken().getFirst().equals("venexus"))
+				System.out.println("DOLCIPATOR! " + url);
+			}
+		}
+	}
+
+	public static int countURLS(){
+		Set<String> count = new HashSet<String>(urls); 
+		return count.size();
+	}
+
+	public static int countLinks(){
+		return linkcount;
+	}
+
+	public static String longest(){
+		Collections.sort(wordLength);
+
+		return longPage.get(wordLength.get(wordLength.size()-1));
+	}
+
+	public static void frequencies(){
+		List<Frequency<String>> count = WordFrequencyCounter.computeWordFrequencies(allWords);
+		for (int i = 0; i < 25; i++){
+			System.out.println(count.get(i));
+		}
+	}
+
+	public static void twoGramCounter(){
+		List<Frequency<TwoGram<String>>> count = TwoGramFrequencyCounter.computeTwoGramFrequencies(allWords);
+		for (int i = 0; i < 25; i++){
+			System.out.println(count.get(i));
+		}
+	}
+	
+	public static void palindromes(){
+		for (int i = 0; i < palindromeLength.size(); i++){
+			if (palindromeLength.get(i) >= 9){
+				System.out.println(palindromeLength.get(i));
+				System.out.println(allPalindromes.get(i));
+				System.out.println(palindromeURL.get(i));
+			}
+		}
+	}
+	
+	public static void dolcipator(){
+		List<Frequency<TwoGram<String>>> count = TwoGramFrequencyCounter.computeTwoGramFrequencies(allWords);
+		for (int i = 0; i < 25; i++){
+			if (count.get(i).getToken().getFirst().equals("dolcipator") && count.get(i).getToken().getFirst().equals("venexus"))
+			System.out.println(count.get(i));
+		}
+	}
+
+}
